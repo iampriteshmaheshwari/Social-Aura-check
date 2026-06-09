@@ -97,11 +97,13 @@ JSON Schema format:
       errorMessage = "Google AI system is currently experiencing high demand. Please try again in a few moments.";
       statusCode = 503;
     } else if (isRateLimited) {
-      errorMessage = "Rate limit or quota exceeded. Please wait a moment and try again.";
+      errorMessage = error?.message?.includes("limit: 0") 
+        ? "Your API key does not have free tier access (limit: 0). You may need to enable billing or use a supported region."
+        : "Rate limit or quota exceeded. Please wait a moment and try again.";
       statusCode = 429;
     }
 
-    res.status(statusCode).json({ error: errorMessage });
+    res.status(statusCode).json({ error: errorMessage, details: error?.message || String(error) });
   }
 }
 
