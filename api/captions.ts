@@ -48,62 +48,24 @@ JSON Schema format:
 { "captions": ["caption 1", "caption 2", "caption 3", "caption 4", "caption 5"] }
 `;
 
-    const models = ["gemini-2.5-flash", "gemini-2.0-flash"];
-    let responseText = "{}";
-    let lastError: any = null;
-    let mostSignificantError: any = null;
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: { parts: [{ text: "Please generate 5 captions for this photo." }, imagePart] },
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+      },
+    });
 
-    for (const model of models) {
-      try {
-        const response = await ai.models.generateContent({
-          model,
-          contents: { parts: [{ text: "Please generate 5 captions for this photo." }, imagePart] },
-          config: {
-            systemInstruction,
-            responseMimeType: "application/json",
-          },
-        });
-
-        responseText = response.text || "{}";
-        lastError = null;
-        break;
-      } catch (err: any) {
-        console.warn(`Model ${model} failed, trying next... Error:`, err?.message || err);
-        lastError = err;
-        
-        // Prioritize capturing rate limits or 503s over 404s
-        if (err?.status === 429 || err?.status === 503 || err?.message?.includes("Quota")) {
-           mostSignificantError = err;
-        }
-      }
-    }
-
-    if (lastError) {
-      throw mostSignificantError || lastError; // Throw the most relevant error if all models failed
-    }
-
+    const responseText = response.text || "{}";
     const captionsData = JSON.parse(responseText);
 
     res.status(200).json(captionsData);
   } catch (error: any) {
     console.error("Error generating captions:", error);
     const isUnavailable = error?.status === 503 || error?.message?.includes("experiencing high demand");
-    const isRateLimited = error?.status === 429 || error?.message?.includes("Quota exceeded") || error?.message?.includes("Too Many Requests");
-    
-    let errorMessage = "Failed to generate captions. Please try again.";
-    let statusCode = 500;
-    
-    if (isUnavailable) {
-      errorMessage = "Google AI system is currently experiencing high demand. Please try again in a few moments.";
-      statusCode = 503;
-    } else if (isRateLimited) {
-      errorMessage = error?.message?.includes("limit: 0") 
-        ? "Your API key does not have free tier access (limit: 0). You may need to enable billing or use a supported region."
-        : "Rate limit or quota exceeded. Please wait a moment and try again.";
-      statusCode = 429;
-    }
-
-    res.status(statusCode).json({ error: errorMessage, details: error?.message || String(error) });
+    res.status(isUnavailable ? 429 : 500).json({ 
+      error: isUnavailable ? "Google AI system is currently experiencing high demand. Please try again in a few moments." : "Failed to generate captions. Please try again." 
+    });
   }
 }
-
