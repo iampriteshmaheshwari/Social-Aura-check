@@ -1,0 +1,6 @@
+{
+  "name": "Social Aura Strategy",
+  "description": "Upload a photo to generate 5 minimalist, premium GenZ social media captions via Gemini LLM analyzing the vibe.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

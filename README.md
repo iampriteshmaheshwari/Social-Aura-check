@@ -1,11 +1,21 @@
-<div align="center">
+# Deployment Guide
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+This application is ready to be deployed to **Vercel** with zero configuration.
 
-  <h1>Built with AI Studio</h2>
+### How it works
+- The frontend is built using **Vite + React**.
+- The API backend is powered by **Vercel Serverless Functions** (located in the `/api` directory).
+- We've added client-side image compression to ensure uploaded images never hit Vercel's 4.5MB Serverless Function payload limit.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+### Deploying to Vercel via GitHub
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+1. Push your repository to GitHub.
+2. Log in to [Vercel](https://vercel.com/) and click **Add New Project**.
+3. Import your GitHub repository.
+4. **Environment Variables**:
+   You must add your Gemini API Key in the Vercel project settings before deploying.
+   - Name: `GEMINI_API_KEY`
+   - Value: `your_gemini_api_key_here`
+5. Click **Deploy**. Vercel will automatically detect Vite and configure the build settings.
 
-</div>
+Your app will be live and fully functional on Vercel's edge network!
